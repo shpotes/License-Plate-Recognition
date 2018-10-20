@@ -8,6 +8,8 @@ Created on Sat Oct 20 12:28:46 2018
 import cv2
 import os
 import time
+from sklearn.cluster import KMeans
+import numpy as np
 
 archivos = os.listdir(r'C:\Users\jmunozb\OneDrive - Universidad EAFIT\Reto AI disruptive\ImagesDetection')
 print('lenarchivos',len(archivos))
@@ -27,18 +29,59 @@ while True:
     vis = img.copy()
 
     regions = mser.detectRegions(gray)
+    ltmp=list(regions[1])
+    sorted_y_idx_list = sorted(range(len(ltmp)),key=lambda x: ltmp[x][0])
+
+    nregions1 = [ltmp[i] for i in sorted_y_idx_list ]
+    nregions0= [regions[0][i] for i in sorted_y_idx_list ]
+  #  print( "Xs:", Xs )
+    #[print(x,y)for x,y in zip(regions[0],regions[1])]
+    """
+    tmp = []
+    for i in range(len(regions[0])):
+        tmp.append([regions[0][i], regions[1][i]])
+    tmp.sort(key=lambda x: x[1][-2] * x[1][-1])
+    """
+    #list1, list2 = (list(t) for t in zip(*sorted(zip(regions[0], regions[1]))))
+    
     ##resulting bounding boxes 
     hulls = []
     hulls2=[]
     hulls3=[]
     areas = []
     contbbox=0
-    for p in regions[0]:
+    epsilon=0
+    coordenaditas=[x[0] for x in nregions1]
+    c2=np.array(coordenaditas).reshape(-1,1)
+    kmeans=KMeans(n_clusters=6,random_state=0).fit(c2)
+    my_labels=kmeans.labels_
+    goodBox=list()
+    current_l=-10
+    cont_km=0
+    firstkm=0
+    my_areas=list()
+    #regions[1].sort(key=lambda x : x[2]*x[3] )
+    print(nregions1)
+    for p in nregions0:
         ax = cv2.contourArea(p)
         a = cv2.convexHull(p.reshape(-1, 1, 2))
-        x, y, w2, h2 =regions[1][contbbox]
-        contbbox+=1
+        x, y, w2, h2 =nregions1[contbbox]
         ax= w2*h2
+        if my_labels[contbbox] == current_l :
+            if ax  > my_areas[cont_km] :
+                my_areas[cont_km]=ax
+        else:
+            if firstkm==0:
+                firstkm=1
+                current_l=my_labels[contbbox]
+                my_areas.append(ax)
+            else:   
+                current_l=my_labels[contbbox]
+                my_areas.append(ax)
+                cont_km+=1
+        contbbox+=1
+        
+        
         if ax > 0.005*(nh*nw) and ax < 0.08*(nh*nw) and h2>w2 and h2<3*w2:
             print('ax_acepted',ax)
             
@@ -54,13 +97,14 @@ while True:
             if   (0.2*nw)<cY<(0.7*nw):
                 hulls.append(a)
                 cv2.circle(vis, (cX, cY), 1, (0, 255, 0), -1)
+                print('centroides',cX,cY)
             else:
                 cv2.circle(vis, (cX, cY), 1, (255, 0, 0), -1)
-                hulls2.append(a)
-                print('cynh',cX,cY,nw,nh)
+              #  hulls2.append(a)
+            #    print('cynh',cX,cY,nw,nh)
         else:
-            print('rechazadas',ax)
-            hulls3.append(a)
+           # print('rechazadas',ax)
+          #  hulls3.append(a)
             """
             M = cv2.moments(p)
    # calculate x,y coordinate of center
@@ -70,7 +114,7 @@ while True:
         cv2.polylines(vis, hulls2, 1, (255,0,0)) 
         cv2.polylines(vis, hulls3, 1, (0,0,255))
         cv2.polylines(vis, hulls, 1, (0,255,0)) 
-
+    print(kmeans.labels_)
 
     cv2.namedWindow('img', 0)
     cv2.imshow('img', vis)
