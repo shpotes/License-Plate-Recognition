@@ -60,7 +60,7 @@ class DataSet:
 
             self.x_val_flat = np.vstack(self.x_val_flat)
             self.y_val = np.vstack(self.y_val)
-            self.y_val_cls = np.vstack(self.y_val_cls)
+            self.y_val_cls = np.array(self.y_val_cls)
 
         self.x_train = []
         self.x_train_flat = []
@@ -77,7 +77,8 @@ class DataSet:
 
         self.x_train_flat = np.vstack(self.x_train_flat)
         self.y_train = np.vstack(self.y_train)
-        self.y_train_cls = np.vstack(self.y_train_cls)
+        #print(self.y_train_cls)
+        self.y_train_cls = np.array(self.y_train_cls)
 
         
         self.x_test = []
@@ -96,7 +97,7 @@ class DataSet:
 
         self.x_test_flat = np.vstack(self.x_test_flat)
         self.y_test = np.vstack(self.y_test)
-        self.y_test_cls = np.vstack(self.y_test_cls)
+        self.y_test_cls = np.array(self.y_test_cls)
 
     
     def random_batch(self, batch_size=32):

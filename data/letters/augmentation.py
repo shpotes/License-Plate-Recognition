@@ -2,13 +2,14 @@ import os, cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import imgaug as ia
+import itertools
 from imgaug import augmenters as iaa
 
 from tqdm import tqdm
 
 
 N_seq = iaa.Sequential([
-    iaa.Fliplr(0.7),
+    iaa.Fliplr(0.1),
     iaa.Crop(percent=(0, 0.3)),
     iaa.Sometimes(0.5,
         iaa.GaussianBlur(sigma=(0, 1))
@@ -26,8 +27,8 @@ sometimes = lambda aug: iaa.Sometimes(0.5, aug)
 
 H_seq = iaa.Sequential(
     [
-        iaa.Fliplr(0.7), # horizontally flip 50% of all images
-        iaa.Flipud(0.4), # vertically flip 20% of all images
+        iaa.Fliplr(0.4), # horizontally flip 50% of all images
+        iaa.Flipud(0.2), # vertically flip 20% of all images
 
         # crop some of the images by 0-10% of their height/width
         sometimes(iaa.Crop(percent=(0, 0.1))),
@@ -153,16 +154,21 @@ H_seq = iaa.Sequential(
 
 DIRR = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 IMG = []
-N = 1000
+N = 10
+def filterr(x, y):
+    if x[0] == '-':
+        return y
+    else:
+        return 255 - y
+
 for i in tqdm(DIRR):
-    IMG = cv2.imread(i+'/'+os.listdir(i)[0])
-    img = 255 - cv2.cvtColor(cv2.resize(IMG, (255, 255)), cv2.COLOR_BGR2GRAY)
-    imgs = np.array([img/2 for i in range(N)])
+    IMG = os.listdir(i)
+    imgs = np.array([filterr(x, cv2.cvtColor(cv2.resize(cv2.imread(i + '/' + x), (28, 28)),
+                                          cv2.COLOR_BGR2GRAY)) for x in IMG * N])
     normal = N_seq.augment_images(imgs)
     heavy = H_seq.augment_images(imgs)
-    ultra_heavy = H_seq.augment_images(normal)
+    # ultra_heavy = H_seq.augment_images(normal)
     for j in range(N):
         cv2.imwrite('{}/N_{}.jpg'.format(i, j), normal[j,:,:])
         cv2.imwrite('{}/H_{}.jpg'.format(i, j), heavy[j,:,:])
-        cv2.imwrite('{}/U_{}.jpg'.format(i, j), ultra_heavy[j,:,:])
-    del imgs; del heavy; del ultra_heavy; del normal
+    del imgs; del heavy; del normal
