@@ -50,6 +50,10 @@ showtime=3 #tiempo para mostrar imagenes
 t_inicial=time.time()
 control_previo=0
 pausa=False
+saveImages=False
+recortadas=True
+contImages=0
+
 while True:
     #print(cv2.getTrackbarPos('Control','image'))
     control=cv2.getTrackbarPos('Control','image')
@@ -68,8 +72,11 @@ while True:
         else:
             if pausa==False:
                 ret, frame = cap.read()
-    else:                                       #Imagenes
-        os.chdir(r'C:\Users\jmunozb\OneDrive - Universidad EAFIT\Reto AI disruptive\2. DATASET PLACAS\1. Placas Originales')
+    else:            
+        if recortadas:
+            os.chdir(r'C:\Users\jmunozb\OneDrive - Universidad EAFIT\Reto AI disruptive\ImagesDetection')                         #Imagenes
+        else:
+            os.chdir(r'C:\Users\jmunozb\OneDrive - Universidad EAFIT\Reto AI disruptive\2. DATASET PLACAS\1. Placas Originales')
         archivos=os.listdir()
         frame=cv2.imread(archivos[i])
         ret=True
@@ -91,6 +98,7 @@ while True:
         upper_range = np.array([45,255,255])
         
         mask = cv2.inRange(hsv, lower_range, upper_range)
+
         output = cv2.bitwise_and(frame, frame, mask = mask2)
         im2, contours, hierarchy = cv2.findContours(mask2.copy(),cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         contours=sorted(contours,key=cv2.contourArea, reverse=True)[:20]
@@ -132,22 +140,31 @@ while True:
                     if rect[1][1] >lim_inf* rect[1][0] and rect[1][1] <lim_sup* rect[1][0]:
                         cv2.drawContours(frame_or,[box],0,(0,255,0),2)
                         M = cv2.getPerspectiveTransform(np.array(box,dtype="float32"), dst)           
-                        warp = cv2.warpPerspective(frame, M, (width, height))
-                   #     if len(approx==4):
-                    #        M2 = cv2.getPerspectiveTransform(np.array(cnt,dtype="float32"), dst)           
-                     #       warp2 = cv2.warpPerspective(frame.copy, M2, (width, height))
-                        print(len(approx),peri,area,area/peri)
+                      #  warp = cv2.warpPerspective(frame, M, (width, height))
+                        warp = cv2.warpPerspective(mask2, M, (width, height))
+                        if len(approx)==4:
+                            
+                            M2 = cv2.getPerspectiveTransform(np.array(approx,dtype="float32"), dst)           
+                            warp2 = cv2.warpPerspective(frame.copy(), M2, (width, height))
+                            print('approx=4',approx,'box',box)
+                        else:
+                            print('approx',approx)
+                        #print(len(approx),peri,area,area/peri)
                     else:
                         cv2.drawContours(frame_or,[box],0,(255,0,0),2)
                 else:
                     if rect[1][0] >lim_inf* rect[1][1] and rect[1][0] <lim_sup* rect[1][1]:
                         cv2.drawContours(frame_or,[box],0,(0,255,0),2)
                         M = cv2.getPerspectiveTransform(np.array(box,dtype="float32"), dst)           
-                        warp = cv2.warpPerspective(frame, M, (width, height))
-                        print(len(approx),peri,area,area/peri)
-                    #    if len(approx==4):
-                     #       M2 = cv2.getPerspectiveTransform(np.array(cnt,dtype="float32"), dst)           
-                      #      warp2 = cv2.warpPerspective(frame.copy, M2, (width, height))
+                       # warp = cv2.warpPerspective(frame, M, (width, height))
+                        warp = cv2.warpPerspective(mask2, M, (width, height))
+                       # print(len(approx),peri,area,area/peri)
+                        if len(approx)==4:
+                            print('approx=4',approx,'box',box)
+                            M2 = cv2.getPerspectiveTransform(np.array(approx,dtype="float32"), dst)           
+                            warp2 = cv2.warpPerspective(frame.copy(), M2, (width, height))
+                        else:
+                            print('approx',approx)
                     else:
                         cv2.drawContours(frame_or,[box],0,(255,0,0),2)
             else:
@@ -168,13 +185,16 @@ while True:
         try:
             warp=cv2.resize(warp,(100,50),interpolation=cv2.INTER_AREA)
             cv2.imshow('warped',warp)
-            """
+            if saveImages:
+                cv2.imwrite('C:/Users/jmunozb/OneDrive - Universidad EAFIT/Reto AI disruptive/ImagesDetectionb/' +str(contImages)+'.png',warp)
+                contImages+=1
             try:
                 warp2=cv2.resize(warp2,(100,50),interpolation=cv2.INTER_AREA)
-                cv2.imshow('warped',warp2)
+                cv2.imshow('warped2',warp2)
             except:
+                print('warp2 not')
                 pass
-                """
+                
         except:
             pass
         cv2.imshow('mask2', mask2)
@@ -188,6 +208,7 @@ while True:
             
         if control_previo==1:
             if (time.time()-t_inicial)>showtime:
+            #if (time.time()-t_inicial)>showtime or saveImages:
                 t_inicial=time.time()
                 i=i+1
                 if i>len(archivos)-1:
