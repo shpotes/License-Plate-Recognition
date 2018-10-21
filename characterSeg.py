@@ -17,6 +17,8 @@ i = 0
 v = 0
 saveChar=True
 contImages2=0
+
+kernel = np.ones((2,2),np.uint8)
 showtime = 3 #tiempo para mostrar imagenes
 while True:
     #print('archivo','C:/Users/jmunozb/OneDrive - Universidad EAFIT/Reto AI disruptive/ImagesDetection/'+archivos[i])
@@ -52,7 +54,7 @@ while True:
     hulls3=[]
     areas = []
     contbbox=0
-    epsilon=8
+    epsilon=0.08*nh
     coordenaditas=[x[0] for x in nregions1]
     c2=np.array(coordenaditas).reshape(-1,1)
     #kmeans=KMeans(n_clusters=6,random_state=0).fit(c2)
@@ -65,6 +67,7 @@ while True:
     my_areas2=list()
     cont_a2=0
     first_m2=1
+    
     #regions[1].sort(key=lambda x : x[2]*x[3] )
     #print(nregions1)
     for p in nregions0:
@@ -153,7 +156,8 @@ while True:
             #hsv = cv2.cvtColor(imgSaved, cv2.COLOR_BGR2HSV)
             try:
                 maskf = cv2.inRange(src=imgSaved, lowerb=lower_range2, upperb=upper_range2)
-               # _,thresh2 = cv2.threshold(maskf,127,255,cv2.THRESH_BINARY_INV)
+                maskf = cv2.morphologyEx(maskf, cv2.MORPH_CLOSE, kernel)
+                # _,thresh2 = cv2.threshold(maskf,127,255,cv2.THRESH_BINARY_INV)
                 cv2.imwrite('C:/Users/jmunozb/OneDrive - Universidad EAFIT/Reto AI disruptive/char/' +str(contImages2)+'.png',maskf)
                 contImages2+=1
             except:
