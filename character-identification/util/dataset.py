@@ -7,7 +7,7 @@ def one_hot(class_numbers, num_classes=None):
     return np.eye(num_classes, dtype=float)[class_numbers]
 
 class DataSet:
-    def __init__(self, img_size, train, data_dir='.'):
+    def __init__(self, img_size, train, data_dir='.', validation=True):
         self.class_names = []
         self.filenames = []
         self.class_names = []
@@ -44,22 +44,23 @@ class DataSet:
         self.train_filenames = self.filenames[:self.num_train]
         self.test_filenames = self.filenames[self.num_train:]
 
-        self.x_val = []
-        self.x_val_flat = []
-        self.y_val = []
-        self.y_val_cls = []
+        if validation:
+            self.x_val = []
+            self.x_val_flat = []
+            self.y_val = []
+            self.y_val_cls = []
 
-        for file in self.validation_filenames:
-            tmp_cls = file.split('/')[-1][0].upper()
-            self.y_val_cls.append(self.class_names.index(tmp_cls))
-            self.y_val.append(one_hot(self.class_names.index(tmp_cls), self.num_classes))
-            img = cv2.cvtColor(cv2.resize(cv2.imread(file), self.img_shape), cv2.COLOR_BGR2GRAY)
-            self.x_val.append(img)
-            self.x_val_flat.append(img.flatten())
+            for file in self.validation_filenames:
+                tmp_cls = file.split('/')[-1][0].upper()
+                self.y_val_cls.append(self.class_names.index(tmp_cls))
+                self.y_val.append(one_hot(self.class_names.index(tmp_cls), self.num_classes))
+                img = cv2.cvtColor(cv2.resize(cv2.imread(file), self.img_shape), cv2.COLOR_BGR2GRAY)
+                self.x_val.append(img)
+                self.x_val_flat.append(img.flatten())
 
-        self.x_val_flat = np.vstack(self.x_val_flat)
-        self.y_val = np.vstack(self.y_val)
-        self.y_val_cls = np.vstack(self.y_val_cls)
+            self.x_val_flat = np.vstack(self.x_val_flat)
+            self.y_val = np.vstack(self.y_val)
+            self.y_val_cls = np.vstack(self.y_val_cls)
 
         self.x_train = []
         self.x_train_flat = []
