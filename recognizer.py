@@ -18,10 +18,12 @@ TRAIN = ""
 # Read data
 data = pickle.load(open('data.pkl', 'rb'))
 
+# Placeholder vairables
 x = tf.placeholder(tf.float32, [None, data.img_size_flat], name='x')
 y_true = tf.placeholder(tf.float32, [None, data.num_classes], name='y_true')
 y_true_cls = tf.argmax(y_true, axis=1)
 
+# Configuration of Neural Network
 layer_fc1 = new_fc_layer(inp=x, num_inputs=data.img_size_flat,
                          num_outputs=FC1_SIZE, use_relu=True,
                          keep_prob=DROP)
@@ -29,26 +31,38 @@ layer_fc1 = new_fc_layer(inp=x, num_inputs=data.img_size_flat,
 layer_fc2 = new_fc_layer(inp=layer_fc1, num_inputs=FC1_SIZE,
                          num_outputs=data.num_classes)
 
+# Predicted class
 y_pred = tf.nn.softmax(layer_fc2)
 y_pred_cls = tf.argmax(y_pred, axis=1)
 
+# Cost-function to be optimized
 cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(logits=layer_fc3,
                                                            labels=y_true)
 cost = tf.reduce_mean(cross_entropy)
+
+# Optimization method
 optimizer = tf.train.AdamOptimizer(learning_rate=LR).minimize(cost)
+
+# Performance Measures
 correct_prediction = tf.equal(y_pred_cls, y_true_cls)
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
+# TensorFlow Run
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
+# Train model
 if not TRAIN:
+    # Perform optimization iterations
     optimize(NITER, optimizer, data, sess)
     print_test_accuracy()
 else:
     pass # TODO https://www.tensorflow.org/guide/saved_model
 
 def prediction(plate, data):
+    """
+    TODO: Document
+    """
     X = []
     for i in plate:
         X.append(255 - cv2.resize(i, data.img_shape).flatten())
