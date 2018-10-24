@@ -6,6 +6,7 @@ import numpy as np
 import cv2
 import os
 import time
+import recognizer
 
 archivos=os.listdir()
 os.listdir()
@@ -249,7 +250,7 @@ while True:
                 box = cv2.boxPoints(rect)
                 box = np.int0(box)
                 cv2.drawContours(frame_or,[box],0,(200,20,200),2)
-        
+
     else:
         break
     for i in range(len(posible_plates)):
@@ -262,3 +263,14 @@ cv2.destroyAllWindows()
 
 
 # the plates aray contains lists with the 6 characters of the plates
+'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+for i, plate in enumerate(plates):
+    y_pred = recognizer.prediction(plate)
+    print(y)
+    NUM = y_pred[:10]
+    print(NUM.shape)
+    CHAR = y_pred[10:]
+    if i < 3:
+        print(np.argmax(NUM), end=' ')
+    else:
+        print(np.argmax(CHAR), end=' ')
