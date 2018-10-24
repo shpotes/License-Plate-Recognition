@@ -22,13 +22,13 @@ Github - https://github.com/shpotes
 Maria Camila Vasquez<br>
 Mathematical Engineering Student<br>
 Departamento de Ciencia Matematicas, Universidad EAFIT.<br>
-Email - mvasqu49[at]eafit[dot]edu[dot]co
+Email - mvasqu49[at]eafit[dot]edu[dot]co<br>
 Github - https://github.com/CamiVasz
 
 Juan Manuel Muñoz<br>
 <br>
 Escuela de Ingeniería, Universidad EAFIT.<br>
-Email - jmunozb[at]eafit[dot]edu[dot]co
+Email - jmunozb[at]eafit[dot]edu[dot]co<br>
 Github - https://github.com/juanma9613
 
 
