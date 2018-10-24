@@ -1,3 +1,4 @@
+#!/bin/bash
 CHARS=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 pdftoppm letters.pdf out -png
